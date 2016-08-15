@@ -186,6 +186,13 @@ class Application(Tkinter.Frame):
         )
         find_regions_button.pack(side=Tkinter.LEFT, anchor=Tkinter.N)
 
+        clear_regions_button = Tkinter.Button(
+            self.right_frame,
+            text='Clear Regions',
+            command=self.clear_rectangles
+        )
+        clear_regions_button.pack(side=Tkinter.LEFT, anchor=Tkinter.N)
+
         # setup some button and key bindings
         self.canvas.bind("<ButtonPress-1>", self.on_draw_button_press)
         self.canvas.bind("<B1-Motion>", self.on_draw_move)
@@ -274,10 +281,15 @@ class Application(Tkinter.Frame):
                 rect[0] + rect[2],
                 rect[1] + rect[3],
                 outline='green',
-                width=2
+                width=2,
+                tag='rect'
             )
 
         self.canvas.delete(self.rect)
+        self.rect = None
+
+    def clear_rectangles(self):
+        self.canvas.delete("rect")
         self.rect = None
 
     def choose_files(self):
