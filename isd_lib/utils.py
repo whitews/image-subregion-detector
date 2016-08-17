@@ -16,46 +16,46 @@ HSV_RANGES = {
     # red is a major color
     'red': [
         {
-            'lower': np.array([0, 39, 25]),
+            'lower': np.array([0, 39, 64]),
             'upper': np.array([20, 255, 255])
         },
         {
-            'lower': np.array([161, 39, 25]),
+            'lower': np.array([161, 39, 64]),
             'upper': np.array([180, 255, 255])
         }
     ],
     # yellow is a minor color
     'yellow': [
         {
-            'lower': np.array([21, 39, 25]),
+            'lower': np.array([21, 39, 64]),
             'upper': np.array([40, 255, 255])
         }
     ],
     # green is a major color
     'green': [
         {
-            'lower': np.array([41, 39, 25]),
+            'lower': np.array([41, 39, 64]),
             'upper': np.array([80, 255, 255])
         }
     ],
     # cyan is a minor color
     'cyan': [
         {
-            'lower': np.array([81, 39, 25]),
+            'lower': np.array([81, 39, 64]),
             'upper': np.array([100, 255, 255])
         }
     ],
     # blue is a major color
     'blue': [
         {
-            'lower': np.array([101, 39, 25]),
+            'lower': np.array([101, 39, 64]),
             'upper': np.array([140, 255, 255])
         }
     ],
     # violet is a minor color
     'violet': [
         {
-            'lower': np.array([141, 39, 25]),
+            'lower': np.array([141, 39, 64]),
             'upper': np.array([160, 255, 255])
         }
     ],
@@ -64,13 +64,13 @@ HSV_RANGES = {
     'black': [
         {
             'lower': np.array([0, 0, 0]),
-            'upper': np.array([180, 255, 24])
+            'upper': np.array([180, 255, 63])
         }
     ],
     # gray is all H values, lower 15% of S, & between 11-89% of V
     'gray': [
         {
-            'lower': np.array([0, 0, 25]),
+            'lower': np.array([0, 0, 64]),
             'upper': np.array([180, 38, 228])
         }
     ],
@@ -84,13 +84,22 @@ HSV_RANGES = {
 }
 
 
-def find_regions(src_img, target_img, dilate=3, min_area=0.5, max_area=2.0):
+def find_regions(
+        src_img,
+        target_img,
+        bg_colors=None,
+        dilate=2,
+        min_area=0.5,
+        max_area=2.0
+):
     """
     Finds regions in source image that are similar to the target image.
 
     Args:
         src_img: 3-D NumPy array of pixels in HSV (source image)
         target_img: 3-D NumPy array of pixels in HSV (target image)
+        bg_colors: list of color names to use for background colors, if
+            None the dominant color in the source image will be used
         dilate: # of dilation iterations performed on masked image
         min_area: minimum area cutoff percentage (compared to target image)
             for returning matching sub-regions
@@ -106,14 +115,16 @@ def find_regions(src_img, target_img, dilate=3, min_area=0.5, max_area=2.0):
         tbd
     """
 
-    # determine dominant color range for the 'background' in the source image
-    bg_color = find_dominant_color(src_img)
+    # if no bg colors are specified, determine dominant color range
+    # for the 'background' in the source image
+    if bg_colors is None:
+        bg_colors = [find_dominant_color(src_img)]
 
     # determine # of pixels of each color range found in the target
     target_color_profile = get_color_profile(target_img)
 
-    # find common color ranges in target (excluding the bg_color)
-    feature_colors = get_common_colors(target_color_profile, bg_color)
+    # find common color ranges in target (excluding the bg_colors)
+    feature_colors = get_common_colors(target_color_profile, bg_colors)
 
     # create masks from feature colors
     mask = create_mask(src_img, feature_colors)
@@ -211,15 +222,17 @@ def get_hsv(hsv_img):
     return hue, sat, val
 
 
-def get_common_colors(color_profile, bg_color, prevalence=0.1):
+def get_common_colors(color_profile, bg_colors, prevalence=0.1):
     """
-    Finds colors in a color profile (excluding bg color) that exceed prevalence
+    Finds colors in a color profile (excluding bg colors) that exceed prevalence
     """
-    total = sum(color_profile.values()) - color_profile[bg_color]
+    total = sum(color_profile.values())
+    for bg_color in bg_colors:
+        total -= color_profile[bg_color]
     common_colors = []
 
     for color, count in color_profile.iteritems():
-        if color == bg_color:
+        if color in bg_colors:
             continue
 
         if count > prevalence * total:
