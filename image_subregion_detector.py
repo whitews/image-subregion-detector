@@ -350,6 +350,7 @@ class Application(Tkinter.Frame):
 
     def clear_rectangles(self):
         self.canvas.delete("rect")
+        self.canvas.delete(self.rect)
         self.rect = None
 
     def choose_files(self):
