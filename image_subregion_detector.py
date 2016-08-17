@@ -1,5 +1,6 @@
 import Tkinter
 import tkFileDialog
+import tkMessageBox
 from PIL import ImageTk
 import PIL.Image
 import os
@@ -319,7 +320,10 @@ class Application(Tkinter.Frame):
                 bg_colors.append(color)
 
         if len(bg_colors) <= 0:
-            # TODO: create warning dialog for selecting at least 1 bg color
+            tkMessageBox.showwarning(
+                'Choose Background Color',
+                'Please choose at least one background color to find regions.'
+            )
             return
 
         region_mask, rectangles = utils.find_regions(
