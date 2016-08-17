@@ -18,7 +18,19 @@ PAD_MEDIUM = 4
 PAD_LARGE = 8
 PAD_EXTRA_LARGE = 14
 
-DEFAULT_DILATE_ITER = 3
+DEFAULT_DILATE_ITER = 2
+
+COLOR_NAMES = [
+    'red',
+    'yellow',
+    'green',
+    'cyan',
+    'blue',
+    'violet',
+    'white',
+    'gray',
+    'black'
+]
 
 
 class Application(Tkinter.Frame):
@@ -29,6 +41,7 @@ class Application(Tkinter.Frame):
 
         self.image_name = None
         self.image_dir = None
+        self.bg_colors = None
 
         self.master.minsize(width=WINDOW_WIDTH, height=WINDOW_HEIGHT)
 
@@ -113,6 +126,43 @@ class Application(Tkinter.Frame):
         self.scrollbar_h.grid(row=1, column=0, sticky=Tkinter.E + Tkinter.W)
 
         # start packing in right_frame
+        bg_colors_frame = Tkinter.Frame(self.right_frame, bg=BACKGROUND_COLOR)
+        bg_colors_frame.pack(
+            fill=Tkinter.BOTH,
+            expand=False,
+            anchor=Tkinter.N,
+            pady=PAD_MEDIUM
+        )
+        bg_colors_label = Tkinter.Label(
+            bg_colors_frame,
+            text="Background colors: ",
+            bg=BACKGROUND_COLOR
+        )
+        bg_colors_label.pack(side=Tkinter.TOP, anchor=Tkinter.W)
+
+        bg_cb_frame = Tkinter.Frame(bg_colors_frame, bg=BACKGROUND_COLOR)
+        bg_cb_frame.pack(
+            fill=Tkinter.NONE,
+            expand=False,
+            anchor=Tkinter.E
+        )
+
+        self.bg_color_vars = {}
+        for color in COLOR_NAMES:
+            self.bg_color_vars[color] = Tkinter.IntVar()
+            self.bg_color_vars[color].set(0)
+            cb = Tkinter.Checkbutton(
+                bg_cb_frame,
+                text=color,
+                variable=self.bg_color_vars[color],
+                bg=BACKGROUND_COLOR
+            )
+            cb.config(
+                borderwidth=0,
+                highlightthickness=0
+            )
+            cb.pack(anchor=Tkinter.W, pady=PAD_SMALL, padx=PAD_MEDIUM)
+
         dilate_frame = Tkinter.Frame(self.right_frame, bg=BACKGROUND_COLOR)
         dilate_frame.pack(
             fill=Tkinter.BOTH,
@@ -263,9 +313,19 @@ class Application(Tkinter.Frame):
         hsv_img = cv2.cvtColor(np.array(self.image), cv2.COLOR_RGB2HSV)
         target = cv2.cvtColor(np.array(region), cv2.COLOR_RGB2HSV)
 
+        bg_colors = []
+        for color, cb_var in self.bg_color_vars.iteritems():
+            if cb_var.get() == 1:
+                bg_colors.append(color)
+
+        if len(bg_colors) <= 0:
+            # TODO: create warning dialog for selecting at least 1 bg color
+            return
+
         region_mask, rectangles = utils.find_regions(
             hsv_img,
             target,
+            bg_colors=bg_colors,
             dilate=self.dilate_iter.get(),
             min_area=self.min_area.get(),
             max_area=self.max_area.get()
