@@ -172,7 +172,7 @@ class Application(Tkinter.Frame):
             pady=PAD_MEDIUM
         )
         self.dilate_iter = Tkinter.IntVar()
-        self.dilate_iter.set(3)
+        self.dilate_iter.set(DEFAULT_DILATE_ITER)
         dilate_label = Tkinter.Label(
             dilate_frame,
             text="Dilation iterations: ",
