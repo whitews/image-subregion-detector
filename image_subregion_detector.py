@@ -307,6 +307,9 @@ class Application(Tkinter.Frame):
         self.canvas.config(cursor='cross')
 
     def find_regions(self):
+        if self.rect is None or self.image is None:
+            return
+
         corners = self.canvas.coords(self.rect)
         corners = tuple([int(c) for c in corners])
         region = self.image.crop(corners)
