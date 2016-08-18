@@ -252,6 +252,8 @@ class Application(Tkinter.Frame):
         self.canvas.bind("<B2-Motion>", self.pan_image)
         self.canvas.bind("<ButtonRelease-2>", self.on_pan_button_release)
 
+        self.canvas.bind("<ButtonPress-3>", self.on_right_button_press)
+
         self.rect = None
 
         self.start_x = None
@@ -306,6 +308,23 @@ class Application(Tkinter.Frame):
     def on_pan_button_release(self, event):
         self.canvas.config(cursor='cross')
 
+    def on_right_button_press(self, event):
+        # have to translate our event position to our current panned location
+        selection = self.canvas.find_closest(
+            self.canvas.canvasx(event.x),
+            self.canvas.canvasy(event.y),
+            start='rect'
+        )
+
+        for item in selection:
+            tags = self.canvas.gettags(item)
+
+            if 'rect' not in tags:
+                # this isn't a rectangle object, do nothing
+                continue
+
+            self.canvas.delete(item)
+
     def find_regions(self):
         if self.rect is None or self.image is None:
             return
@@ -342,12 +361,18 @@ class Application(Tkinter.Frame):
 
     def draw_rectangles(self, rectangles):
         for rect in rectangles:
+            # using a custom fully transparent bitmap for the stipple, b/c
+            # if the rectangle has no fill we cannot catch mouse clicks
+            # within its boundaries (only on the border itself)
+            # a bit of a hack but it works
             self.canvas.create_rectangle(
                 rect[0],
                 rect[1],
                 rect[0] + rect[2],
                 rect[1] + rect[3],
                 outline='green',
+                fill='gray',
+                stipple='@trans.xbm',
                 width=2,
                 tag='rect'
             )
