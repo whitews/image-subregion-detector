@@ -366,7 +366,16 @@ class Application(Tkinter.Frame):
 
         selected_file = tkFileDialog.askopenfile('r')
 
-        self.image = PIL.Image.open(selected_file)
+        # some of the files may be 3-channel 16-bit/chan TIFFs, which
+        # PIL doesn't support. OpenCV can read these, but converts them
+        # to 8-bit/chan. So, we'll open all images in OpenCV first,
+        # then create a PIL Image to finally create an ImageTk PhotoImage
+        cv_img = cv2.imread(selected_file.name)
+
+        self.image = PIL.Image.fromarray(
+            cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB),
+            'RGB'
+        )
         height, width = self.image.size
         self.canvas.config(scrollregion=(0, 0, height, width))
         self.tk_image = ImageTk.PhotoImage(self.image)
