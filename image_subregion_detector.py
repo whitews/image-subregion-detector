@@ -69,7 +69,7 @@ class Application(Tkinter.Frame):
             expand=False,
             side=Tkinter.LEFT,
             padx=PAD_MEDIUM,
-            pady=40
+            pady=(40, 10)
         )
 
         file_chooser_frame = Tkinter.Frame(self.left_frame, bg=BACKGROUND_COLOR)
@@ -230,19 +230,49 @@ class Application(Tkinter.Frame):
         max_area_label_entry.pack(side=Tkinter.RIGHT, anchor=Tkinter.N)
         max_area_label.pack(side=Tkinter.RIGHT, anchor=Tkinter.N)
 
-        find_regions_button = Tkinter.Button(
+        region_buttons_frame = Tkinter.Frame(
             self.right_frame,
+            bg=BACKGROUND_COLOR
+        )
+        region_buttons_frame.pack(
+            fill=Tkinter.BOTH,
+            expand=False,
+            anchor=Tkinter.N,
+            pady=PAD_MEDIUM
+        )
+
+        find_regions_button = Tkinter.Button(
+            region_buttons_frame,
             text='Find Regions',
             command=self.find_regions
         )
         find_regions_button.pack(side=Tkinter.LEFT, anchor=Tkinter.N)
 
         clear_regions_button = Tkinter.Button(
-            self.right_frame,
+            region_buttons_frame,
             text='Clear Regions',
             command=self.clear_rectangles
         )
         clear_regions_button.pack(side=Tkinter.LEFT, anchor=Tkinter.N)
+
+        # preview frame holding small full-size depiction of chosen image
+        preview_frame = Tkinter.Frame(
+            self.right_frame,
+            bg=BACKGROUND_COLOR
+        )
+        preview_frame.pack(
+            fill=Tkinter.NONE,
+            expand=False,
+            anchor=Tkinter.S,
+            side=Tkinter.BOTTOM
+        )
+
+        self.preview_canvas = Tkinter.Canvas(
+            preview_frame,
+            highlightthickness=0
+        )
+        self.preview_canvas.config(width=200, height=200)
+        self.preview_canvas.pack(anchor=Tkinter.S, side=Tkinter.BOTTOM)
 
         # setup some button and key bindings
         self.canvas.bind("<ButtonPress-1>", self.on_draw_button_press)
@@ -264,6 +294,7 @@ class Application(Tkinter.Frame):
 
         self.image = None
         self.tk_image = None
+        self.preview_image = None
 
         self.pack()
 
@@ -405,6 +436,18 @@ class Application(Tkinter.Frame):
         self.canvas.config(scrollregion=(0, 0, height, width))
         self.tk_image = ImageTk.PhotoImage(self.image)
         self.canvas.create_image(0, 0, anchor=Tkinter.NW, image=self.tk_image)
+
+        tmp_preview_image = self.image.resize(
+            (200, 200),
+            PIL.Image.ANTIALIAS
+        )
+        self.preview_image = ImageTk.PhotoImage(tmp_preview_image)
+        self.preview_canvas.create_image(
+            0,
+            0,
+            anchor=Tkinter.NW,
+            image=self.preview_image
+        )
 
         self.image_name = os.path.basename(selected_file.name)
         self.image_dir = os.path.dirname(selected_file.name)
