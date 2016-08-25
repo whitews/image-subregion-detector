@@ -288,6 +288,8 @@ class Application(Tkinter.Frame):
 
         self.canvas.bind("<ButtonPress-3>", self.on_right_button_press)
 
+        self.canvas.bind("<Configure>", self.canvas_size_changed)
+
         self.scrollbar_h.bind("<B1-Motion>", self.update_preview)
         self.scrollbar_v.bind("<B1-Motion>", self.update_preview)
 
@@ -461,6 +463,11 @@ class Application(Tkinter.Frame):
             delta_x,
             delta_y
         )
+
+    # noinspection PyUnusedLocal
+    def canvas_size_changed(self, event):
+        self.preview_canvas.delete('preview_rect')
+        self.set_preview_rectangle()
 
     def choose_files(self):
         self.canvas.delete(self.rect)
