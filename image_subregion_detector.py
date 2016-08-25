@@ -260,7 +260,9 @@ class Application(Tkinter.Frame):
         # preview frame holding small full-size depiction of chosen image
         preview_frame = Tkinter.Frame(
             self.right_frame,
-            bg=BACKGROUND_COLOR
+            bg=BACKGROUND_COLOR,
+            highlightthickness=1,
+            highlightbackground='black'
         )
         preview_frame.pack(
             fill=Tkinter.NONE,
@@ -428,8 +430,8 @@ class Application(Tkinter.Frame):
         y1, y2 = self.scrollbar_v.get()
 
         self.preview_rectangle = self.preview_canvas.create_rectangle(
-            int(x1 * PREVIEW_SIZE),
-            int(y1 * PREVIEW_SIZE),
+            int(x1 * PREVIEW_SIZE) + 1,
+            int(y1 * PREVIEW_SIZE) + 1,
             int(x2 * PREVIEW_SIZE),
             int(y2 * PREVIEW_SIZE),
             outline='lime',
@@ -451,8 +453,8 @@ class Application(Tkinter.Frame):
             self.preview_rectangle
         )
 
-        delta_x = int(x1 * PREVIEW_SIZE) - rx1
-        delta_y = int(y1 * PREVIEW_SIZE) - ry1
+        delta_x = int(x1 * PREVIEW_SIZE) + 1 - rx1
+        delta_y = int(y1 * PREVIEW_SIZE) + 1 - ry1
 
         self.preview_canvas.move(
             self.preview_rectangle,
