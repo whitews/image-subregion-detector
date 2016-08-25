@@ -14,6 +14,8 @@ BACKGROUND_COLOR = '#ededed'
 WINDOW_WIDTH = 800
 WINDOW_HEIGHT = 680
 
+PREVIEW_SIZE = 200  # height & width of preview in pixels
+
 PAD_SMALL = 2
 PAD_MEDIUM = 4
 PAD_LARGE = 8
@@ -271,7 +273,7 @@ class Application(Tkinter.Frame):
             preview_frame,
             highlightthickness=0
         )
-        self.preview_canvas.config(width=200, height=200)
+        self.preview_canvas.config(width=PREVIEW_SIZE, height=PREVIEW_SIZE)
         self.preview_canvas.pack(anchor=Tkinter.S, side=Tkinter.BOTTOM)
 
         # setup some button and key bindings
@@ -284,6 +286,9 @@ class Application(Tkinter.Frame):
 
         self.canvas.bind("<ButtonPress-3>", self.on_right_button_press)
 
+        self.scrollbar_h.bind("<B1-Motion>", self.update_preview)
+        self.scrollbar_v.bind("<B1-Motion>", self.update_preview)
+
         self.rect = None
 
         self.start_x = None
@@ -295,6 +300,7 @@ class Application(Tkinter.Frame):
         self.image = None
         self.tk_image = None
         self.preview_image = None
+        self.preview_rectangle = None
 
         self.pack()
 
@@ -334,6 +340,7 @@ class Application(Tkinter.Frame):
             event.y - self.pan_start_y,
             gain=1
         )
+        self.update_preview(None)
 
     # noinspection PyUnusedLocal
     def on_pan_button_release(self, event):
@@ -416,6 +423,43 @@ class Application(Tkinter.Frame):
         self.canvas.delete(self.rect)
         self.rect = None
 
+    def set_preview_rectangle(self):
+        x1, x2 = self.scrollbar_h.get()
+        y1, y2 = self.scrollbar_v.get()
+
+        self.preview_rectangle = self.preview_canvas.create_rectangle(
+            int(x1 * PREVIEW_SIZE),
+            int(y1 * PREVIEW_SIZE),
+            int(x2 * PREVIEW_SIZE),
+            int(y2 * PREVIEW_SIZE),
+            outline='lime',
+            width=2,
+            tag='preview_rect'
+        )
+
+    # noinspection PyUnusedLocal
+    def update_preview(self, event):
+        if self.preview_rectangle is None:
+            # do nothing
+            return
+
+        x1, x2 = self.scrollbar_h.get()
+        y1, y2 = self.scrollbar_v.get()
+
+        # current rectangle position
+        rx1, ry1, rx2, ry2 = self.preview_canvas.coords(
+            self.preview_rectangle
+        )
+
+        delta_x = int(x1 * PREVIEW_SIZE) - rx1
+        delta_y = int(y1 * PREVIEW_SIZE) - ry1
+
+        self.preview_canvas.move(
+            self.preview_rectangle,
+            delta_x,
+            delta_y
+        )
+
     def choose_files(self):
         self.canvas.delete(self.rect)
         self.rect = None
@@ -437,10 +481,16 @@ class Application(Tkinter.Frame):
         self.tk_image = ImageTk.PhotoImage(self.image)
         self.canvas.create_image(0, 0, anchor=Tkinter.NW, image=self.tk_image)
 
+        # have to force an update of the UI else the canvas scroll bars
+        # will not have updated fast enough to get their positions for
+        # drawing the preview rectangle
+        self.update()
+
         tmp_preview_image = self.image.resize(
-            (200, 200),
+            (PREVIEW_SIZE, PREVIEW_SIZE),
             PIL.Image.ANTIALIAS
         )
+        self.preview_canvas.delete('all')
         self.preview_image = ImageTk.PhotoImage(tmp_preview_image)
         self.preview_canvas.create_image(
             0,
@@ -448,6 +498,7 @@ class Application(Tkinter.Frame):
             anchor=Tkinter.NW,
             image=self.preview_image
         )
+        self.set_preview_rectangle()
 
         self.image_name = os.path.basename(selected_file.name)
         self.image_dir = os.path.dirname(selected_file.name)
