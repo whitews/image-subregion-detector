@@ -295,6 +295,8 @@ class Application(Tkinter.Frame):
         self.scrollbar_v.bind("<B1-Motion>", self.update_preview)
         self.scrollbar_v.bind("<ButtonRelease-1>", self.update_preview)
 
+        self.preview_canvas.bind("<ButtonPress-1>", self.move_preview_rectangle)
+
         self.rect = None
 
         self.start_x = None
@@ -465,6 +467,39 @@ class Application(Tkinter.Frame):
             delta_x,
             delta_y
         )
+
+    def move_preview_rectangle(self, event):
+        if self.preview_rectangle is None:
+            # do nothing
+            return
+
+        x1, y1, x2, y2 = self.preview_canvas.coords(self.preview_rectangle)
+
+        half_width = float(x2 - x1) / 2
+        half_height = float(y2 - y1) / 2
+
+        if event.x + half_width >= PREVIEW_SIZE - 1:
+            new_x = PREVIEW_SIZE - (half_width * 2) - 1
+        else:
+            new_x = event.x - half_width
+
+        if event.y + half_height >= PREVIEW_SIZE - 1:
+            new_y = PREVIEW_SIZE - (half_height * 2) - 1
+        else:
+            new_y = event.y - half_height
+
+        self.canvas.xview(
+            Tkinter.MOVETO,
+            float(new_x) / PREVIEW_SIZE
+        )
+
+        self.canvas.yview(
+            Tkinter.MOVETO,
+            float(new_y) / PREVIEW_SIZE
+        )
+
+        self.update()
+        self.update_preview(None)
 
     # noinspection PyUnusedLocal
     def canvas_size_changed(self, event):
