@@ -291,7 +291,9 @@ class Application(Tkinter.Frame):
         self.canvas.bind("<Configure>", self.canvas_size_changed)
 
         self.scrollbar_h.bind("<B1-Motion>", self.update_preview)
+        self.scrollbar_h.bind("<ButtonRelease-1>", self.update_preview)
         self.scrollbar_v.bind("<B1-Motion>", self.update_preview)
+        self.scrollbar_v.bind("<ButtonRelease-1>", self.update_preview)
 
         self.rect = None
 
