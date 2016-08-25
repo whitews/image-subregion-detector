@@ -219,7 +219,7 @@ class Application(Tkinter.Frame):
         self.max_area.set(2.0)
         max_area_label = Tkinter.Label(
             max_area_frame,
-            text="Minimum area: ",
+            text="Maximum area: ",
             bg=BACKGROUND_COLOR
         )
         max_area_label_entry = Tkinter.Entry(
