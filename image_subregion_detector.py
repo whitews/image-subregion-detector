@@ -45,6 +45,7 @@ class Application(Tkinter.Frame):
         self.image_name = None
         self.image_dir = None
         self.bg_colors = None
+        self.region_count = Tkinter.IntVar()
 
         self.master.minsize(width=WINDOW_WIDTH, height=WINDOW_HEIGHT)
 
@@ -257,6 +258,33 @@ class Application(Tkinter.Frame):
         )
         clear_regions_button.pack(side=Tkinter.LEFT, anchor=Tkinter.N)
 
+        # frame showing various stats about found regions
+        stats_frame = Tkinter.Frame(
+            self.right_frame,
+            bg=BACKGROUND_COLOR,
+            highlightthickness=1,
+            highlightbackground='gray'
+        )
+        stats_frame.pack(
+            fill=Tkinter.BOTH,
+            expand=True,
+            anchor=Tkinter.N,
+            pady=PAD_LARGE,
+            padx=PAD_MEDIUM
+        )
+        region_count_desc_label = Tkinter.Label(
+            stats_frame,
+            text="# of regions: ",
+            bg=BACKGROUND_COLOR
+        )
+        region_count_desc_label.pack(side=Tkinter.LEFT, anchor=Tkinter.N)
+        region_count_label = Tkinter.Label(
+            stats_frame,
+            textvariable=self.region_count,
+            bg=BACKGROUND_COLOR
+        )
+        region_count_label.pack(side=Tkinter.RIGHT, anchor=Tkinter.N)
+
         # preview frame holding small full-size depiction of chosen image
         preview_frame = Tkinter.Frame(
             self.right_frame,
@@ -404,6 +432,8 @@ class Application(Tkinter.Frame):
             max_area=self.max_area.get()
         )
 
+        self.region_count.set(len(rectangles))
+
         self.draw_rectangles(rectangles)
 
     def draw_rectangles(self, rectangles):
@@ -431,6 +461,7 @@ class Application(Tkinter.Frame):
         self.canvas.delete("rect")
         self.canvas.delete(self.rect)
         self.rect = None
+        self.region_count.set(0)
 
     def set_preview_rectangle(self):
         x1, x2 = self.scrollbar_h.get()
@@ -516,6 +547,7 @@ class Application(Tkinter.Frame):
 
         self.canvas.delete('all')
         self.rect = None
+        self.region_count.set(0)
 
         # some of the files may be 3-channel 16-bit/chan TIFFs, which
         # PIL doesn't support. OpenCV can read these, but converts them
