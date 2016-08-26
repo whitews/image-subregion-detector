@@ -508,10 +508,14 @@ class Application(Tkinter.Frame):
         self.set_preview_rectangle()
 
     def choose_files(self):
-        self.canvas.delete(self.rect)
-        self.rect = None
-
         selected_file = tkFileDialog.askopenfile('r')
+
+        if selected_file is None:
+            # do nothing, user cancelled file dialog
+            return
+
+        self.canvas.delete('all')
+        self.rect = None
 
         # some of the files may be 3-channel 16-bit/chan TIFFs, which
         # PIL doesn't support. OpenCV can read these, but converts them
