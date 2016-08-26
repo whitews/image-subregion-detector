@@ -46,6 +46,9 @@ class Application(Tkinter.Frame):
         self.image_dir = None
         self.bg_colors = None
         self.region_count = Tkinter.IntVar()
+        self.region_min = Tkinter.DoubleVar()
+        self.region_max = Tkinter.DoubleVar()
+        self.region_avg = Tkinter.DoubleVar()
 
         self.master.minsize(width=WINDOW_WIDTH, height=WINDOW_HEIGHT)
 
@@ -272,18 +275,101 @@ class Application(Tkinter.Frame):
             pady=PAD_LARGE,
             padx=PAD_MEDIUM
         )
-        region_count_desc_label = Tkinter.Label(
+        region_count_frame = Tkinter.Frame(
             stats_frame,
+            bg=BACKGROUND_COLOR
+        )
+        region_count_frame.pack(
+            fill=Tkinter.BOTH,
+            expand=True,
+            anchor=Tkinter.N,
+            pady=PAD_SMALL,
+            padx=PAD_SMALL
+        )
+        region_count_desc_label = Tkinter.Label(
+            region_count_frame,
             text="# of regions: ",
             bg=BACKGROUND_COLOR
         )
         region_count_desc_label.pack(side=Tkinter.LEFT, anchor=Tkinter.N)
         region_count_label = Tkinter.Label(
-            stats_frame,
+            region_count_frame,
             textvariable=self.region_count,
             bg=BACKGROUND_COLOR
         )
         region_count_label.pack(side=Tkinter.RIGHT, anchor=Tkinter.N)
+        
+        region_min_frame = Tkinter.Frame(
+            stats_frame,
+            bg=BACKGROUND_COLOR
+        )
+        region_min_frame.pack(
+            fill=Tkinter.BOTH,
+            expand=True,
+            anchor=Tkinter.N,
+            pady=PAD_SMALL,
+            padx=PAD_SMALL
+        )
+        region_min_desc_label = Tkinter.Label(
+            region_min_frame,
+            text="Minimum size: ",
+            bg=BACKGROUND_COLOR
+        )
+        region_min_desc_label.pack(side=Tkinter.LEFT, anchor=Tkinter.N)
+        region_min_label = Tkinter.Label(
+            region_min_frame,
+            textvariable=self.region_min,
+            bg=BACKGROUND_COLOR
+        )
+        region_min_label.pack(side=Tkinter.RIGHT, anchor=Tkinter.N)
+        
+        region_max_frame = Tkinter.Frame(
+            stats_frame,
+            bg=BACKGROUND_COLOR
+        )
+        region_max_frame.pack(
+            fill=Tkinter.BOTH,
+            expand=True,
+            anchor=Tkinter.N,
+            pady=PAD_SMALL,
+            padx=PAD_SMALL
+        )
+        region_max_desc_label = Tkinter.Label(
+            region_max_frame,
+            text="Maximum size: ",
+            bg=BACKGROUND_COLOR
+        )
+        region_max_desc_label.pack(side=Tkinter.LEFT, anchor=Tkinter.N)
+        region_max_label = Tkinter.Label(
+            region_max_frame,
+            textvariable=self.region_max,
+            bg=BACKGROUND_COLOR
+        )
+        region_max_label.pack(side=Tkinter.RIGHT, anchor=Tkinter.N)
+        
+        region_avg_frame = Tkinter.Frame(
+            stats_frame,
+            bg=BACKGROUND_COLOR
+        )
+        region_avg_frame.pack(
+            fill=Tkinter.BOTH,
+            expand=True,
+            anchor=Tkinter.N,
+            pady=PAD_SMALL,
+            padx=PAD_SMALL
+        )
+        region_avg_desc_label = Tkinter.Label(
+            region_avg_frame,
+            text="Average size: ",
+            bg=BACKGROUND_COLOR
+        )
+        region_avg_desc_label.pack(side=Tkinter.LEFT, anchor=Tkinter.N)
+        region_avg_label = Tkinter.Label(
+            region_avg_frame,
+            textvariable=self.region_avg,
+            bg=BACKGROUND_COLOR
+        )
+        region_avg_label.pack(side=Tkinter.RIGHT, anchor=Tkinter.N)
 
         # preview frame holding small full-size depiction of chosen image
         preview_frame = Tkinter.Frame(
@@ -432,9 +518,36 @@ class Application(Tkinter.Frame):
             max_area=self.max_area.get()
         )
 
+        region_areas = self.get_region_areas(region_mask)
+
         self.region_count.set(len(rectangles))
+        self.region_min.set(min(region_areas))
+        self.region_max.set(max(region_areas))
+        self.region_avg.set(np.round(np.mean(region_areas), decimals=1))
 
         self.draw_rectangles(rectangles)
+
+    @staticmethod
+    def get_region_areas(mask):
+        """
+        Returns list of pixel count for objects in mask
+
+        Args:
+            mask: binary mask of regions (3-D NumPy array)
+        """
+        ret, thresh = cv2.threshold(mask, 1, 255, cv2.THRESH_BINARY)
+        new_mask, contours, hierarchy = cv2.findContours(
+            thresh,
+            cv2.RETR_CCOMP,
+            cv2.CHAIN_APPROX_SIMPLE
+        )
+
+        c_areas = []
+
+        for c in contours:
+            c_areas.append(cv2.contourArea(c))
+
+        return c_areas
 
     def draw_rectangles(self, rectangles):
         for rect in rectangles:
@@ -462,6 +575,9 @@ class Application(Tkinter.Frame):
         self.canvas.delete(self.rect)
         self.rect = None
         self.region_count.set(0)
+        self.region_min.set(0.0)
+        self.region_max.set(0.0)
+        self.region_avg.set(0.0)
 
     def set_preview_rectangle(self):
         x1, x2 = self.scrollbar_h.get()
@@ -548,6 +664,9 @@ class Application(Tkinter.Frame):
         self.canvas.delete('all')
         self.rect = None
         self.region_count.set(0)
+        self.region_min.set(0.0)
+        self.region_max.set(0.0)
+        self.region_avg.set(0.0)
 
         # some of the files may be 3-channel 16-bit/chan TIFFs, which
         # PIL doesn't support. OpenCV can read these, but converts them
