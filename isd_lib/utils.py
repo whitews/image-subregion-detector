@@ -1,6 +1,5 @@
 import cv2
 import numpy as np
-import matplotlib.pyplot as plt
 
 # Define color ranges in HSV with lower & upper ranges
 # NOTE: HSV value range in OpenCV:
@@ -145,10 +144,10 @@ def find_regions(
     # remove contours below min_area and above max_area
     min_pixels = int(feature_area * min_area)
     max_pixels = int(feature_area * max_area)
-    mask, rects = filter_blobs_by_size(mask, min_pixels, max_pixels)
+    mask, rectangles = filter_blobs_by_size(mask, min_pixels, max_pixels)
 
     # return contours & bounding rectangle coordinates
-    return mask, rects
+    return mask, rectangles
 
 
 def find_dominant_color(hsv_img):
@@ -285,14 +284,14 @@ def filter_blobs_by_size(mask, min_pixels, max_pixels):
         cv2.CHAIN_APPROX_SIMPLE
     )
 
-    rects = []
+    rectangles = []
 
     for c in contours:
         c_area = cv2.contourArea(c)
         if min_pixels <= c_area <= max_pixels:
             cv2.drawContours(new_mask, [c], 0, 255, -1)
-            rects.append(cv2.boundingRect(c))
+            rectangles.append(cv2.boundingRect(c))
         else:
             cv2.drawContours(new_mask, [c], 0, 0, -1)
 
-    return new_mask, rects
+    return new_mask, rectangles
