@@ -477,6 +477,7 @@ class Application(Tkinter.Frame):
         # update rectangle size with mouse position
         self.canvas.coords(self.rect, self.start_x, self.start_y, cur_x, cur_y)
 
+    # noinspection PyUnusedLocal
     def on_draw_release(self, event):
         if self.rect is None or self.image is None:
             return
