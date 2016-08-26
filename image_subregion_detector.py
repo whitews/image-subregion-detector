@@ -296,7 +296,7 @@ class Application(Tkinter.Frame):
         )
         stats_frame.pack(
             fill=Tkinter.BOTH,
-            expand=True,
+            expand=False,
             anchor=Tkinter.N,
             pady=PAD_LARGE,
             padx=PAD_MEDIUM
