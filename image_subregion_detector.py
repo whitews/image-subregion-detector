@@ -51,6 +51,7 @@ class Application(Tkinter.Frame):
         self.region_avg = Tkinter.DoubleVar()
 
         self.master.minsize(width=WINDOW_WIDTH, height=WINDOW_HEIGHT)
+        self.master.title("Image Sub-region Detector")
 
         self.main_frame = Tkinter.Frame(self.master, bg=BACKGROUND_COLOR)
         self.main_frame.pack(
