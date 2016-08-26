@@ -147,6 +147,32 @@ class Application(Tkinter.Frame):
         )
         bg_colors_label.pack(side=Tkinter.TOP, anchor=Tkinter.W)
 
+        color_profile_frame = Tkinter.Frame(
+            bg_colors_frame,
+            bg=BACKGROUND_COLOR
+        )
+        color_profile_frame.pack(
+            fill=Tkinter.X,
+            expand=True,
+            anchor=Tkinter.W,
+            side=Tkinter.LEFT
+        )
+
+        self.color_profile_vars = {}
+        for color in COLOR_NAMES:
+            self.color_profile_vars[color] = Tkinter.StringVar()
+            self.color_profile_vars[color].set("0.0%")
+            l = Tkinter.Label(
+                color_profile_frame,
+                textvariable=self.color_profile_vars[color],
+                bg=BACKGROUND_COLOR
+            )
+            l.config(
+                borderwidth=0,
+                highlightthickness=0
+            )
+            l.pack(anchor=Tkinter.E, pady=PAD_SMALL, padx=PAD_MEDIUM)
+
         bg_cb_frame = Tkinter.Frame(bg_colors_frame, bg=BACKGROUND_COLOR)
         bg_cb_frame.pack(
             fill=Tkinter.NONE,
@@ -395,6 +421,7 @@ class Application(Tkinter.Frame):
         # setup some button and key bindings
         self.canvas.bind("<ButtonPress-1>", self.on_draw_button_press)
         self.canvas.bind("<B1-Motion>", self.on_draw_move)
+        self.canvas.bind("<ButtonRelease-1>", self.on_draw_release)
 
         self.canvas.bind("<ButtonPress-2>", self.on_pan_button_press)
         self.canvas.bind("<B2-Motion>", self.pan_image)
@@ -449,6 +476,26 @@ class Application(Tkinter.Frame):
 
         # update rectangle size with mouse position
         self.canvas.coords(self.rect, self.start_x, self.start_y, cur_x, cur_y)
+
+    def on_draw_release(self, event):
+        if self.rect is None or self.image is None:
+            return
+
+        corners = self.canvas.coords(self.rect)
+        corners = tuple([int(c) for c in corners])
+        region = self.image.crop(corners)
+
+        target = cv2.cvtColor(np.array(region), cv2.COLOR_RGB2HSV)
+
+        color_profile = utils.get_color_profile(target)
+
+        total_pixels = (corners[2] - corners[0]) * (corners[3] - corners[1])
+
+        for color in COLOR_NAMES:
+            color_percent = (float(color_profile[color]) / total_pixels) * 100
+            self.color_profile_vars[color].set(
+                "%.1f%%" % np.round(color_percent, decimals=1)
+            )
 
     def on_pan_button_press(self, event):
         self.canvas.config(cursor='fleur')
@@ -549,6 +596,10 @@ class Application(Tkinter.Frame):
 
         return c_areas
 
+    def reset_color_profile(self):
+        for color in COLOR_NAMES:
+            self.color_profile_vars[color].set("0.0%")
+
     def draw_rectangles(self, rectangles):
         for rect in rectangles:
             # using a custom fully transparent bitmap for the stipple, b/c
@@ -569,6 +620,7 @@ class Application(Tkinter.Frame):
 
         self.canvas.delete(self.rect)
         self.rect = None
+        self.reset_color_profile()
 
     def clear_rectangles(self):
         self.canvas.delete("rect")
@@ -578,6 +630,7 @@ class Application(Tkinter.Frame):
         self.region_min.set(0.0)
         self.region_max.set(0.0)
         self.region_avg.set(0.0)
+        self.reset_color_profile()
 
     def set_preview_rectangle(self):
         x1, x2 = self.scrollbar_h.get()
