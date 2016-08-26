@@ -11,7 +11,7 @@ from isd_lib import utils
 
 BACKGROUND_COLOR = '#ededed'
 
-WINDOW_WIDTH = 800
+WINDOW_WIDTH = 870
 WINDOW_HEIGHT = 680
 
 PREVIEW_SIZE = 200  # height & width of preview in pixels
