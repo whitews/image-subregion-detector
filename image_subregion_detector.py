@@ -296,6 +296,7 @@ class Application(Tkinter.Frame):
         self.scrollbar_v.bind("<ButtonRelease-1>", self.update_preview)
 
         self.preview_canvas.bind("<ButtonPress-1>", self.move_preview_rectangle)
+        self.preview_canvas.bind("<B1-Motion>", self.move_preview_rectangle)
 
         self.rect = None
 
