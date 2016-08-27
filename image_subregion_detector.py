@@ -487,6 +487,10 @@ class Application(Tkinter.Frame):
         corners = tuple([int(c) for c in corners])
         region = self.image.crop(corners)
 
+        if 0 in region.size:
+            # either height or width is zero, do nothing
+            return
+
         target = cv2.cvtColor(np.array(region), cv2.COLOR_RGB2HSV)
 
         color_profile = utils.get_color_profile(target)
