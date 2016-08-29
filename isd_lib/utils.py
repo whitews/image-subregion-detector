@@ -147,6 +147,9 @@ def find_regions(
     mask = fill_holes(mask)
     target_mask = fill_holes(target_mask)
 
+    # select largest blob from target mask
+    target_mask = filter_largest_blob(target_mask)
+
     # determine target mask area
     feature_area = np.sum(target_mask) / 255
 
@@ -278,6 +281,34 @@ def fill_holes(mask):
     )
     for cnt in contours:
         cv2.drawContours(new_mask, [cnt], 0, 255, -1)
+
+    return new_mask
+
+
+def filter_largest_blob(mask):
+    """
+    Filters a given binary mask for the largest blob
+    """
+    ret, thresh = cv2.threshold(mask, 1, 255, cv2.THRESH_BINARY)
+    mask, contours, hierarchy = cv2.findContours(
+        thresh,
+        cv2.RETR_CCOMP,
+        cv2.CHAIN_APPROX_SIMPLE
+    )
+
+    max_size = 0
+    max_contour = None
+
+    new_mask = np.zeros(mask.shape, dtype=mask.dtype)
+
+    for c in contours:
+        c_area = cv2.contourArea(c)
+
+        if c_area > max_size:
+            max_size = c_area
+            max_contour = c
+
+    cv2.drawContours(new_mask, [max_contour], 0, 255, -1)
 
     return new_mask
 
