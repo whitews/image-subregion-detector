@@ -595,14 +595,21 @@ class Application(Tkinter.Frame):
             max_area=self.max_area.get()
         )
 
-        region_areas = self.get_region_areas(region_mask)
+        # make sure we have at least one detected region
+        if len(rectangles) > 0:
+            region_areas = self.get_region_areas(region_mask)
 
-        self.region_count.set(len(rectangles))
-        self.region_min.set(min(region_areas))
-        self.region_max.set(max(region_areas))
-        self.region_avg.set(np.round(np.mean(region_areas), decimals=1))
+            self.region_count.set(len(rectangles))
+            self.region_min.set(min(region_areas))
+            self.region_max.set(max(region_areas))
+            self.region_avg.set(np.round(np.mean(region_areas), decimals=1))
 
-        self.draw_rectangles(rectangles)
+            self.draw_rectangles(rectangles)
+        else:
+            self.region_count.set(0)
+            self.region_min.set(0.0)
+            self.region_max.set(0.0)
+            self.region_avg.set(0.0)
 
     @staticmethod
     def get_region_areas(mask):
