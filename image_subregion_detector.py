@@ -21,6 +21,7 @@ PAD_MEDIUM = 4
 PAD_LARGE = 8
 PAD_EXTRA_LARGE = 14
 
+DEFAULT_ERODE_ITER = 0
 DEFAULT_DILATE_ITER = 2
 
 COLOR_NAMES = [
@@ -196,6 +197,28 @@ class Application(Tkinter.Frame):
                 highlightthickness=0
             )
             cb.pack(anchor=Tkinter.W, pady=PAD_SMALL, padx=PAD_MEDIUM)
+
+        erode_frame = Tkinter.Frame(self.right_frame, bg=BACKGROUND_COLOR)
+        erode_frame.pack(
+            fill=Tkinter.BOTH,
+            expand=False,
+            anchor=Tkinter.N,
+            pady=PAD_MEDIUM
+        )
+        self.erode_iter = Tkinter.IntVar()
+        self.erode_iter.set(DEFAULT_ERODE_ITER)
+        erode_label = Tkinter.Label(
+            erode_frame,
+            text="Erosion iterations: ",
+            bg=BACKGROUND_COLOR
+        )
+        erode_label_entry = Tkinter.Entry(
+            erode_frame,
+            textvariable=self.erode_iter
+        )
+        erode_label_entry.config(width=4)
+        erode_label_entry.pack(side=Tkinter.RIGHT, anchor=Tkinter.N)
+        erode_label.pack(side=Tkinter.RIGHT, anchor=Tkinter.N)
 
         dilate_frame = Tkinter.Frame(self.right_frame, bg=BACKGROUND_COLOR)
         dilate_frame.pack(
@@ -566,6 +589,7 @@ class Application(Tkinter.Frame):
             hsv_img,
             target,
             bg_colors=bg_colors,
+            pre_erode=self.erode_iter.get(),
             dilate=self.dilate_iter.get(),
             min_area=self.min_area.get(),
             max_area=self.max_area.get()

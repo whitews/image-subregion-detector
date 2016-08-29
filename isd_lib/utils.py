@@ -87,6 +87,7 @@ def find_regions(
         src_img,
         target_img,
         bg_colors=None,
+        pre_erode=0,
         dilate=2,
         min_area=0.5,
         max_area=2.0
@@ -99,6 +100,8 @@ def find_regions(
         target_img: 3-D NumPy array of pixels in HSV (target image)
         bg_colors: list of color names to use for background colors, if
             None the dominant color in the source image will be used
+        pre_erode: # of erosion iterations performed on masked image
+            prior to any dilation iterations
         dilate: # of dilation iterations performed on masked image
         min_area: minimum area cutoff percentage (compared to target image)
             for returning matching sub-regions
@@ -129,8 +132,14 @@ def find_regions(
     mask = create_mask(src_img, feature_colors)
     target_mask = create_mask(target_img, feature_colors)
 
-    # dilate masks
+    # define kernel used for erosion & dilation
     kernel = np.ones((3, 3), np.uint8)
+
+    # erode masks
+    mask = cv2.erode(mask, kernel, iterations=pre_erode)
+    target_mask = cv2.erode(target_mask, kernel, iterations=pre_erode)
+
+    # dilate masks
     mask = cv2.dilate(mask, kernel, iterations=dilate)
     target_mask = cv2.dilate(target_mask, kernel, iterations=dilate)
 
