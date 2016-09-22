@@ -198,7 +198,7 @@ def get_color_profile(hsv_img):
 
     color_profile = {}
 
-    for color, color_ranges in HSV_RANGES.iteritems():
+    for color, color_ranges in HSV_RANGES.items():
         color_profile[color] = 0
 
         for color_range in color_ranges:
@@ -242,7 +242,7 @@ def get_common_colors(color_profile, bg_colors, prevalence=0.1):
         total -= color_profile[bg_color]
     common_colors = []
 
-    for color, count in color_profile.iteritems():
+    for color, count in color_profile.items():
         if color in bg_colors:
             continue
 

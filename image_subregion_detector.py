@@ -1,6 +1,6 @@
-import Tkinter
-import tkFileDialog
-import tkMessageBox
+import tkinter as Tkinter
+from tkinter import filedialog as tkFileDialog
+from tkinter import messagebox as tkMessageBox
 from PIL import ImageTk
 import PIL.Image
 import os
@@ -490,7 +490,7 @@ class Application(Tkinter.Frame):
                 self.start_y,
                 self.start_x,
                 self.start_y,
-                outline='green',
+                outline='#00ff00',
                 width=2
             )
 
@@ -574,7 +574,7 @@ class Application(Tkinter.Frame):
         target = cv2.cvtColor(np.array(region), cv2.COLOR_RGB2HSV)
 
         bg_colors = []
-        for color, cb_var in self.bg_color_vars.iteritems():
+        for color, cb_var in self.bg_color_vars.items():
             if cb_var.get() == 1:
                 bg_colors.append(color)
 
@@ -648,7 +648,7 @@ class Application(Tkinter.Frame):
                 rect[1],
                 rect[0] + rect[2],
                 rect[1] + rect[3],
-                outline='green',
+                outline='#00ff00',
                 fill='gray',
                 stipple='@trans.xbm',
                 width=2,
@@ -678,7 +678,7 @@ class Application(Tkinter.Frame):
             int(y1 * PREVIEW_SIZE) + 1,
             int(x2 * PREVIEW_SIZE),
             int(y2 * PREVIEW_SIZE),
-            outline='lime',
+            outline='#00ff00',
             width=2,
             tag='preview_rect'
         )
