@@ -96,6 +96,13 @@ class Application(tkinter.Frame):
         )
         file_chooser_button.pack(side=tkinter.LEFT)
 
+        export_button = tkinter.Button(
+            file_chooser_frame,
+            text='Export Sub-regions',
+            command=self.export_sub_regions
+        )
+        export_button.pack(side=tkinter.RIGHT)
+
         # the canvas frame's contents will use grid b/c of the double
         # scrollbar (they don't look right using pack), but the canvas itself
         # will be packed in its frame
@@ -794,6 +801,9 @@ class Application(tkinter.Frame):
 
         self.image_name = os.path.basename(selected_file.name)
         self.image_dir = os.path.dirname(selected_file.name)
+
+    def export_sub_regions(self):
+        pass
 
 root = tkinter.Tk()
 app = Application(root)
