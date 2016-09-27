@@ -1,6 +1,6 @@
-import tkinter as Tkinter
-from tkinter import filedialog as tkFileDialog
-from tkinter import messagebox as tkMessageBox
+import tkinter
+from tkinter import filedialog
+from tkinter import messagebox
 from PIL import ImageTk
 import PIL.Image
 import os
@@ -37,88 +37,88 @@ COLOR_NAMES = [
 ]
 
 
-class Application(Tkinter.Frame):
+class Application(tkinter.Frame):
 
     def __init__(self, master):
 
-        Tkinter.Frame.__init__(self, master=master)
+        tkinter.Frame.__init__(self, master=master)
 
         self.image_name = None
         self.image_dir = None
         self.bg_colors = None
-        self.region_count = Tkinter.IntVar()
-        self.region_min = Tkinter.DoubleVar()
-        self.region_max = Tkinter.DoubleVar()
-        self.region_avg = Tkinter.DoubleVar()
+        self.region_count = tkinter.IntVar()
+        self.region_min = tkinter.DoubleVar()
+        self.region_max = tkinter.DoubleVar()
+        self.region_avg = tkinter.DoubleVar()
 
         self.master.minsize(width=WINDOW_WIDTH, height=WINDOW_HEIGHT)
         self.master.title("Image Sub-region Detector")
 
-        self.main_frame = Tkinter.Frame(self.master, bg=BACKGROUND_COLOR)
+        self.main_frame = tkinter.Frame(self.master, bg=BACKGROUND_COLOR)
         self.main_frame.pack(
-            fill=Tkinter.BOTH,
+            fill=tkinter.BOTH,
             expand=True,
             padx=0,
             pady=0
         )
 
-        self.left_frame = Tkinter.Frame(self.main_frame, bg=BACKGROUND_COLOR)
+        self.left_frame = tkinter.Frame(self.main_frame, bg=BACKGROUND_COLOR)
         self.left_frame.pack(
-            fill=Tkinter.BOTH,
+            fill=tkinter.BOTH,
             expand=True,
-            side=Tkinter.LEFT,
+            side=tkinter.LEFT,
             padx=0,
             pady=0
         )
 
-        self.right_frame = Tkinter.Frame(self.main_frame, bg=BACKGROUND_COLOR)
+        self.right_frame = tkinter.Frame(self.main_frame, bg=BACKGROUND_COLOR)
         self.right_frame.pack(
-            fill=Tkinter.Y,
+            fill=tkinter.Y,
             expand=False,
-            side=Tkinter.LEFT,
+            side=tkinter.LEFT,
             padx=PAD_MEDIUM,
             pady=(40, 10)
         )
 
-        file_chooser_frame = Tkinter.Frame(self.left_frame, bg=BACKGROUND_COLOR)
+        file_chooser_frame = tkinter.Frame(self.left_frame, bg=BACKGROUND_COLOR)
         file_chooser_frame.pack(
-            fill=Tkinter.X,
+            fill=tkinter.X,
             expand=False,
-            anchor=Tkinter.N,
+            anchor=tkinter.N,
             padx=PAD_MEDIUM,
             pady=PAD_MEDIUM
         )
 
-        file_chooser_button = Tkinter.Button(
+        file_chooser_button = tkinter.Button(
             file_chooser_frame,
             text='Choose Image File...',
             command=self.choose_files
         )
-        file_chooser_button.pack(side=Tkinter.LEFT)
+        file_chooser_button.pack(side=tkinter.LEFT)
 
         # the canvas frame's contents will use grid b/c of the double
         # scrollbar (they don't look right using pack), but the canvas itself
         # will be packed in its frame
-        canvas_frame = Tkinter.Frame(self.left_frame, bg=BACKGROUND_COLOR)
+        canvas_frame = tkinter.Frame(self.left_frame, bg=BACKGROUND_COLOR)
         canvas_frame.grid_rowconfigure(0, weight=1)
         canvas_frame.grid_columnconfigure(0, weight=1)
         canvas_frame.pack(
-            fill=Tkinter.BOTH,
+            fill=tkinter.BOTH,
             expand=True,
-            anchor=Tkinter.N,
+            anchor=tkinter.N,
             padx=PAD_MEDIUM,
             pady=PAD_MEDIUM
         )
 
-        self.canvas = Tkinter.Canvas(canvas_frame, cursor="cross")
+        self.canvas = tkinter.Canvas(canvas_frame, cursor="cross")
 
-        self.scrollbar_v = Tkinter.Scrollbar(
+        self.scrollbar_v = tkinter.Scrollbar(
             canvas_frame,
-            orient=Tkinter.VERTICAL
+            orient=tkinter.VERTICAL
         )
-        self.scrollbar_h = Tkinter.Scrollbar(
+        self.scrollbar_h = tkinter.Scrollbar(
             canvas_frame,
-            orient=Tkinter.HORIZONTAL
+            orient=tkinter.HORIZONTAL
         )
         self.scrollbar_v.config(command=self.canvas.yview)
         self.scrollbar_h.config(command=self.canvas.xview)
@@ -129,42 +129,42 @@ class Application(Tkinter.Frame):
         self.canvas.grid(
             row=0,
             column=0,
-            sticky=Tkinter.N + Tkinter.S + Tkinter.E + Tkinter.W
+            sticky=tkinter.N + tkinter.S + tkinter.E + tkinter.W
         )
-        self.scrollbar_v.grid(row=0, column=1, sticky=Tkinter.N + Tkinter.S)
-        self.scrollbar_h.grid(row=1, column=0, sticky=Tkinter.E + Tkinter.W)
+        self.scrollbar_v.grid(row=0, column=1, sticky=tkinter.N + tkinter.S)
+        self.scrollbar_h.grid(row=1, column=0, sticky=tkinter.E + tkinter.W)
 
         # start packing in right_frame
-        bg_colors_frame = Tkinter.Frame(self.right_frame, bg=BACKGROUND_COLOR)
+        bg_colors_frame = tkinter.Frame(self.right_frame, bg=BACKGROUND_COLOR)
         bg_colors_frame.pack(
-            fill=Tkinter.BOTH,
+            fill=tkinter.BOTH,
             expand=False,
-            anchor=Tkinter.N,
+            anchor=tkinter.N,
             pady=PAD_MEDIUM
         )
-        bg_colors_label = Tkinter.Label(
+        bg_colors_label = tkinter.Label(
             bg_colors_frame,
             text="Background colors: ",
             bg=BACKGROUND_COLOR
         )
-        bg_colors_label.pack(side=Tkinter.TOP, anchor=Tkinter.W)
+        bg_colors_label.pack(side=tkinter.TOP, anchor=tkinter.W)
 
-        color_profile_frame = Tkinter.Frame(
+        color_profile_frame = tkinter.Frame(
             bg_colors_frame,
             bg=BACKGROUND_COLOR
         )
         color_profile_frame.pack(
-            fill=Tkinter.X,
+            fill=tkinter.X,
             expand=True,
-            anchor=Tkinter.W,
-            side=Tkinter.LEFT
+            anchor=tkinter.W,
+            side=tkinter.LEFT
         )
 
         self.color_profile_vars = {}
         for color in COLOR_NAMES:
-            self.color_profile_vars[color] = Tkinter.StringVar()
+            self.color_profile_vars[color] = tkinter.StringVar()
             self.color_profile_vars[color].set("0.0%")
-            l = Tkinter.Label(
+            l = tkinter.Label(
                 color_profile_frame,
                 textvariable=self.color_profile_vars[color],
                 bg=BACKGROUND_COLOR
@@ -173,20 +173,20 @@ class Application(Tkinter.Frame):
                 borderwidth=0,
                 highlightthickness=0
             )
-            l.pack(anchor=Tkinter.E, pady=PAD_SMALL, padx=PAD_MEDIUM)
+            l.pack(anchor=tkinter.E, pady=PAD_SMALL, padx=PAD_MEDIUM)
 
-        bg_cb_frame = Tkinter.Frame(bg_colors_frame, bg=BACKGROUND_COLOR)
+        bg_cb_frame = tkinter.Frame(bg_colors_frame, bg=BACKGROUND_COLOR)
         bg_cb_frame.pack(
-            fill=Tkinter.NONE,
+            fill=tkinter.NONE,
             expand=False,
-            anchor=Tkinter.E
+            anchor=tkinter.E
         )
 
         self.bg_color_vars = {}
         for color in COLOR_NAMES:
-            self.bg_color_vars[color] = Tkinter.IntVar()
+            self.bg_color_vars[color] = tkinter.IntVar()
             self.bg_color_vars[color].set(0)
-            cb = Tkinter.Checkbutton(
+            cb = tkinter.Checkbutton(
                 bg_cb_frame,
                 text=color,
                 variable=self.bg_color_vars[color],
@@ -196,251 +196,251 @@ class Application(Tkinter.Frame):
                 borderwidth=0,
                 highlightthickness=0
             )
-            cb.pack(anchor=Tkinter.W, pady=PAD_SMALL, padx=PAD_MEDIUM)
+            cb.pack(anchor=tkinter.W, pady=PAD_SMALL, padx=PAD_MEDIUM)
 
-        erode_frame = Tkinter.Frame(self.right_frame, bg=BACKGROUND_COLOR)
+        erode_frame = tkinter.Frame(self.right_frame, bg=BACKGROUND_COLOR)
         erode_frame.pack(
-            fill=Tkinter.BOTH,
+            fill=tkinter.BOTH,
             expand=False,
-            anchor=Tkinter.N,
+            anchor=tkinter.N,
             pady=PAD_MEDIUM
         )
-        self.erode_iter = Tkinter.IntVar()
+        self.erode_iter = tkinter.IntVar()
         self.erode_iter.set(DEFAULT_ERODE_ITER)
-        erode_label = Tkinter.Label(
+        erode_label = tkinter.Label(
             erode_frame,
             text="Erosion iterations: ",
             bg=BACKGROUND_COLOR
         )
-        erode_label_entry = Tkinter.Entry(
+        erode_label_entry = tkinter.Entry(
             erode_frame,
             textvariable=self.erode_iter
         )
         erode_label_entry.config(width=4)
-        erode_label_entry.pack(side=Tkinter.RIGHT, anchor=Tkinter.N)
-        erode_label.pack(side=Tkinter.RIGHT, anchor=Tkinter.N)
+        erode_label_entry.pack(side=tkinter.RIGHT, anchor=tkinter.N)
+        erode_label.pack(side=tkinter.RIGHT, anchor=tkinter.N)
 
-        dilate_frame = Tkinter.Frame(self.right_frame, bg=BACKGROUND_COLOR)
+        dilate_frame = tkinter.Frame(self.right_frame, bg=BACKGROUND_COLOR)
         dilate_frame.pack(
-            fill=Tkinter.BOTH,
+            fill=tkinter.BOTH,
             expand=False,
-            anchor=Tkinter.N,
+            anchor=tkinter.N,
             pady=PAD_MEDIUM
         )
-        self.dilate_iter = Tkinter.IntVar()
+        self.dilate_iter = tkinter.IntVar()
         self.dilate_iter.set(DEFAULT_DILATE_ITER)
-        dilate_label = Tkinter.Label(
+        dilate_label = tkinter.Label(
             dilate_frame,
             text="Dilation iterations: ",
             bg=BACKGROUND_COLOR
         )
-        dilate_label_entry = Tkinter.Entry(
+        dilate_label_entry = tkinter.Entry(
             dilate_frame,
             textvariable=self.dilate_iter
         )
         dilate_label_entry.config(width=4)
-        dilate_label_entry.pack(side=Tkinter.RIGHT, anchor=Tkinter.N)
-        dilate_label.pack(side=Tkinter.RIGHT, anchor=Tkinter.N)
+        dilate_label_entry.pack(side=tkinter.RIGHT, anchor=tkinter.N)
+        dilate_label.pack(side=tkinter.RIGHT, anchor=tkinter.N)
 
-        min_area_frame = Tkinter.Frame(self.right_frame, bg=BACKGROUND_COLOR)
+        min_area_frame = tkinter.Frame(self.right_frame, bg=BACKGROUND_COLOR)
         min_area_frame.pack(
-            fill=Tkinter.BOTH,
+            fill=tkinter.BOTH,
             expand=False,
-            anchor=Tkinter.N,
+            anchor=tkinter.N,
             pady=PAD_MEDIUM
         )
-        self.min_area = Tkinter.DoubleVar()
+        self.min_area = tkinter.DoubleVar()
         self.min_area.set(0.5)
-        min_area_label = Tkinter.Label(
+        min_area_label = tkinter.Label(
             min_area_frame,
             text="Minimum area: ",
             bg=BACKGROUND_COLOR
         )
-        min_area_label_entry = Tkinter.Entry(
+        min_area_label_entry = tkinter.Entry(
             min_area_frame,
             textvariable=self.min_area
         )
         min_area_label_entry.config(width=4)
-        min_area_label_entry.pack(side=Tkinter.RIGHT, anchor=Tkinter.N)
-        min_area_label.pack(side=Tkinter.RIGHT, anchor=Tkinter.N)
+        min_area_label_entry.pack(side=tkinter.RIGHT, anchor=tkinter.N)
+        min_area_label.pack(side=tkinter.RIGHT, anchor=tkinter.N)
         
-        max_area_frame = Tkinter.Frame(self.right_frame, bg=BACKGROUND_COLOR)
+        max_area_frame = tkinter.Frame(self.right_frame, bg=BACKGROUND_COLOR)
         max_area_frame.pack(
-            fill=Tkinter.BOTH,
+            fill=tkinter.BOTH,
             expand=False,
-            anchor=Tkinter.N,
+            anchor=tkinter.N,
             pady=PAD_MEDIUM
         )
-        self.max_area = Tkinter.DoubleVar()
+        self.max_area = tkinter.DoubleVar()
         self.max_area.set(2.0)
-        max_area_label = Tkinter.Label(
+        max_area_label = tkinter.Label(
             max_area_frame,
             text="Maximum area: ",
             bg=BACKGROUND_COLOR
         )
-        max_area_label_entry = Tkinter.Entry(
+        max_area_label_entry = tkinter.Entry(
             max_area_frame,
             textvariable=self.max_area
         )
         max_area_label_entry.config(width=4)
-        max_area_label_entry.pack(side=Tkinter.RIGHT, anchor=Tkinter.N)
-        max_area_label.pack(side=Tkinter.RIGHT, anchor=Tkinter.N)
+        max_area_label_entry.pack(side=tkinter.RIGHT, anchor=tkinter.N)
+        max_area_label.pack(side=tkinter.RIGHT, anchor=tkinter.N)
 
-        region_buttons_frame = Tkinter.Frame(
+        region_buttons_frame = tkinter.Frame(
             self.right_frame,
             bg=BACKGROUND_COLOR
         )
         region_buttons_frame.pack(
-            fill=Tkinter.BOTH,
+            fill=tkinter.BOTH,
             expand=False,
-            anchor=Tkinter.N,
+            anchor=tkinter.N,
             pady=PAD_MEDIUM
         )
 
-        find_regions_button = Tkinter.Button(
+        find_regions_button = tkinter.Button(
             region_buttons_frame,
             text='Find Regions',
             command=self.find_regions
         )
-        find_regions_button.pack(side=Tkinter.LEFT, anchor=Tkinter.N)
+        find_regions_button.pack(side=tkinter.LEFT, anchor=tkinter.N)
 
-        clear_regions_button = Tkinter.Button(
+        clear_regions_button = tkinter.Button(
             region_buttons_frame,
             text='Clear Regions',
             command=self.clear_rectangles
         )
-        clear_regions_button.pack(side=Tkinter.LEFT, anchor=Tkinter.N)
+        clear_regions_button.pack(side=tkinter.LEFT, anchor=tkinter.N)
 
         # frame showing various stats about found regions
-        stats_frame = Tkinter.Frame(
+        stats_frame = tkinter.Frame(
             self.right_frame,
             bg=BACKGROUND_COLOR,
             highlightthickness=1,
             highlightbackground='gray'
         )
         stats_frame.pack(
-            fill=Tkinter.BOTH,
+            fill=tkinter.BOTH,
             expand=False,
-            anchor=Tkinter.N,
+            anchor=tkinter.N,
             pady=PAD_LARGE,
             padx=PAD_MEDIUM
         )
-        region_count_frame = Tkinter.Frame(
+        region_count_frame = tkinter.Frame(
             stats_frame,
             bg=BACKGROUND_COLOR
         )
         region_count_frame.pack(
-            fill=Tkinter.BOTH,
+            fill=tkinter.BOTH,
             expand=True,
-            anchor=Tkinter.N,
+            anchor=tkinter.N,
             pady=PAD_SMALL,
             padx=PAD_SMALL
         )
-        region_count_desc_label = Tkinter.Label(
+        region_count_desc_label = tkinter.Label(
             region_count_frame,
             text="# of regions: ",
             bg=BACKGROUND_COLOR
         )
-        region_count_desc_label.pack(side=Tkinter.LEFT, anchor=Tkinter.N)
-        region_count_label = Tkinter.Label(
+        region_count_desc_label.pack(side=tkinter.LEFT, anchor=tkinter.N)
+        region_count_label = tkinter.Label(
             region_count_frame,
             textvariable=self.region_count,
             bg=BACKGROUND_COLOR
         )
-        region_count_label.pack(side=Tkinter.RIGHT, anchor=Tkinter.N)
+        region_count_label.pack(side=tkinter.RIGHT, anchor=tkinter.N)
         
-        region_min_frame = Tkinter.Frame(
+        region_min_frame = tkinter.Frame(
             stats_frame,
             bg=BACKGROUND_COLOR
         )
         region_min_frame.pack(
-            fill=Tkinter.BOTH,
+            fill=tkinter.BOTH,
             expand=True,
-            anchor=Tkinter.N,
+            anchor=tkinter.N,
             pady=PAD_SMALL,
             padx=PAD_SMALL
         )
-        region_min_desc_label = Tkinter.Label(
+        region_min_desc_label = tkinter.Label(
             region_min_frame,
             text="Minimum size: ",
             bg=BACKGROUND_COLOR
         )
-        region_min_desc_label.pack(side=Tkinter.LEFT, anchor=Tkinter.N)
-        region_min_label = Tkinter.Label(
+        region_min_desc_label.pack(side=tkinter.LEFT, anchor=tkinter.N)
+        region_min_label = tkinter.Label(
             region_min_frame,
             textvariable=self.region_min,
             bg=BACKGROUND_COLOR
         )
-        region_min_label.pack(side=Tkinter.RIGHT, anchor=Tkinter.N)
+        region_min_label.pack(side=tkinter.RIGHT, anchor=tkinter.N)
         
-        region_max_frame = Tkinter.Frame(
+        region_max_frame = tkinter.Frame(
             stats_frame,
             bg=BACKGROUND_COLOR
         )
         region_max_frame.pack(
-            fill=Tkinter.BOTH,
+            fill=tkinter.BOTH,
             expand=True,
-            anchor=Tkinter.N,
+            anchor=tkinter.N,
             pady=PAD_SMALL,
             padx=PAD_SMALL
         )
-        region_max_desc_label = Tkinter.Label(
+        region_max_desc_label = tkinter.Label(
             region_max_frame,
             text="Maximum size: ",
             bg=BACKGROUND_COLOR
         )
-        region_max_desc_label.pack(side=Tkinter.LEFT, anchor=Tkinter.N)
-        region_max_label = Tkinter.Label(
+        region_max_desc_label.pack(side=tkinter.LEFT, anchor=tkinter.N)
+        region_max_label = tkinter.Label(
             region_max_frame,
             textvariable=self.region_max,
             bg=BACKGROUND_COLOR
         )
-        region_max_label.pack(side=Tkinter.RIGHT, anchor=Tkinter.N)
+        region_max_label.pack(side=tkinter.RIGHT, anchor=tkinter.N)
         
-        region_avg_frame = Tkinter.Frame(
+        region_avg_frame = tkinter.Frame(
             stats_frame,
             bg=BACKGROUND_COLOR
         )
         region_avg_frame.pack(
-            fill=Tkinter.BOTH,
+            fill=tkinter.BOTH,
             expand=True,
-            anchor=Tkinter.N,
+            anchor=tkinter.N,
             pady=PAD_SMALL,
             padx=PAD_SMALL
         )
-        region_avg_desc_label = Tkinter.Label(
+        region_avg_desc_label = tkinter.Label(
             region_avg_frame,
             text="Average size: ",
             bg=BACKGROUND_COLOR
         )
-        region_avg_desc_label.pack(side=Tkinter.LEFT, anchor=Tkinter.N)
-        region_avg_label = Tkinter.Label(
+        region_avg_desc_label.pack(side=tkinter.LEFT, anchor=tkinter.N)
+        region_avg_label = tkinter.Label(
             region_avg_frame,
             textvariable=self.region_avg,
             bg=BACKGROUND_COLOR
         )
-        region_avg_label.pack(side=Tkinter.RIGHT, anchor=Tkinter.N)
+        region_avg_label.pack(side=tkinter.RIGHT, anchor=tkinter.N)
 
         # preview frame holding small full-size depiction of chosen image
-        preview_frame = Tkinter.Frame(
+        preview_frame = tkinter.Frame(
             self.right_frame,
             bg=BACKGROUND_COLOR,
             highlightthickness=1,
             highlightbackground='black'
         )
         preview_frame.pack(
-            fill=Tkinter.NONE,
+            fill=tkinter.NONE,
             expand=False,
-            anchor=Tkinter.S,
-            side=Tkinter.BOTTOM
+            anchor=tkinter.S,
+            side=tkinter.BOTTOM
         )
 
-        self.preview_canvas = Tkinter.Canvas(
+        self.preview_canvas = tkinter.Canvas(
             preview_frame,
             highlightthickness=0
         )
         self.preview_canvas.config(width=PREVIEW_SIZE, height=PREVIEW_SIZE)
-        self.preview_canvas.pack(anchor=Tkinter.S, side=Tkinter.BOTTOM)
+        self.preview_canvas.pack(anchor=tkinter.S, side=tkinter.BOTTOM)
 
         # setup some button and key bindings
         self.canvas.bind("<ButtonPress-1>", self.on_draw_button_press)
@@ -579,7 +579,7 @@ class Application(Tkinter.Frame):
                 bg_colors.append(color)
 
         if len(bg_colors) <= 0:
-            tkMessageBox.showwarning(
+            messagebox.showwarning(
                 'Choose Background Color',
                 'Please choose at least one background color to find regions.'
             )
@@ -727,12 +727,12 @@ class Application(Tkinter.Frame):
             new_y = event.y - half_height
 
         self.canvas.xview(
-            Tkinter.MOVETO,
+            tkinter.MOVETO,
             float(new_x) / PREVIEW_SIZE
         )
 
         self.canvas.yview(
-            Tkinter.MOVETO,
+            tkinter.MOVETO,
             float(new_y) / PREVIEW_SIZE
         )
 
@@ -745,7 +745,7 @@ class Application(Tkinter.Frame):
         self.set_preview_rectangle()
 
     def choose_files(self):
-        selected_file = tkFileDialog.askopenfile('r')
+        selected_file = filedialog.askopenfile('r')
 
         if selected_file is None:
             # do nothing, user cancelled file dialog
@@ -771,7 +771,7 @@ class Application(Tkinter.Frame):
         height, width = self.image.size
         self.canvas.config(scrollregion=(0, 0, height, width))
         self.tk_image = ImageTk.PhotoImage(self.image)
-        self.canvas.create_image(0, 0, anchor=Tkinter.NW, image=self.tk_image)
+        self.canvas.create_image(0, 0, anchor=tkinter.NW, image=self.tk_image)
 
         # have to force an update of the UI else the canvas scroll bars
         # will not have updated fast enough to get their positions for
@@ -787,7 +787,7 @@ class Application(Tkinter.Frame):
         self.preview_canvas.create_image(
             0,
             0,
-            anchor=Tkinter.NW,
+            anchor=tkinter.NW,
             image=self.preview_image
         )
         self.set_preview_rectangle()
@@ -795,6 +795,6 @@ class Application(Tkinter.Frame):
         self.image_name = os.path.basename(selected_file.name)
         self.image_dir = os.path.dirname(selected_file.name)
 
-root = Tkinter.Tk()
+root = tkinter.Tk()
 app = Application(root)
 root.mainloop()
