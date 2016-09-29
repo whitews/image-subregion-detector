@@ -592,7 +592,7 @@ class Application(tkinter.Frame):
             )
             return
 
-        region_mask, rectangles = utils.find_regions(
+        contours = utils.find_regions(
             hsv_img,
             target,
             bg_colors=bg_colors,
@@ -603,10 +603,10 @@ class Application(tkinter.Frame):
         )
 
         # make sure we have at least one detected region
-        if len(rectangles) > 0:
-            region_areas = self.get_region_areas(region_mask)
+        if len(contours) > 0:
+            region_areas, rectangles = self.get_contour_data(contours)
 
-            self.region_count.set(len(rectangles))
+            self.region_count.set(len(contours))
             self.region_min.set(min(region_areas))
             self.region_max.set(max(region_areas))
             self.region_avg.set(np.round(np.mean(region_areas), decimals=1))
@@ -619,26 +619,23 @@ class Application(tkinter.Frame):
             self.region_avg.set(0.0)
 
     @staticmethod
-    def get_region_areas(mask):
+    def get_contour_data(contours):
         """
-        Returns list of pixel count for objects in mask
+        Returns list of pixel counts (areas) & bounding rectangles for
+        given contours
 
         Args:
-            mask: binary mask of regions (3-D NumPy array)
+            contours: list of OpenCV contours
         """
-        ret, thresh = cv2.threshold(mask, 1, 255, cv2.THRESH_BINARY)
-        new_mask, contours, hierarchy = cv2.findContours(
-            thresh,
-            cv2.RETR_CCOMP,
-            cv2.CHAIN_APPROX_SIMPLE
-        )
 
         c_areas = []
+        rectangles = []
 
         for c in contours:
             c_areas.append(cv2.contourArea(c))
+            rectangles.append(cv2.boundingRect(c))
 
-        return c_areas
+        return c_areas, rectangles
 
     def reset_color_profile(self):
         for color in COLOR_NAMES:

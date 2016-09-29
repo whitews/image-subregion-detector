@@ -156,10 +156,10 @@ def find_regions(
     # remove contours below min_area and above max_area
     min_pixels = int(feature_area * min_area)
     max_pixels = int(feature_area * max_area)
-    mask, rectangles = filter_blobs_by_size(mask, min_pixels, max_pixels)
+    contours = filter_blobs_by_size(mask, min_pixels, max_pixels)
 
-    # return contours & bounding rectangle coordinates
-    return mask, rectangles
+    # return contours
+    return contours
 
 
 def find_dominant_color(hsv_img):
@@ -324,14 +324,11 @@ def filter_blobs_by_size(mask, min_pixels, max_pixels):
         cv2.CHAIN_APPROX_SIMPLE
     )
 
-    rectangles = []
+    good_contours = []
 
     for c in contours:
         c_area = cv2.contourArea(c)
         if min_pixels <= c_area <= max_pixels:
-            cv2.drawContours(new_mask, [c], 0, 255, -1)
-            rectangles.append(cv2.boundingRect(c))
-        else:
-            cv2.drawContours(new_mask, [c], 0, 0, -1)
+            good_contours.append(c)
 
-    return new_mask, rectangles
+    return good_contours
