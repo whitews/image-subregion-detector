@@ -574,6 +574,7 @@ class Application(tkinter.Frame):
                 continue
 
             self.canvas.delete(item)
+            self.regions.pop(item)
 
     def find_regions(self):
         if self.rect is None or self.image is None:
