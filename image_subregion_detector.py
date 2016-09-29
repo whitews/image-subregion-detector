@@ -624,8 +624,8 @@ class Application(tkinter.Frame):
         Args:
             contours: list of OpenCV contours
         """
-        self.clear_rectangles()  # TODO: should be clear_regions
-        self.regions = {}
+        self.clear_rectangles()
+        self.regions = {}  # reset regions dictionary
 
         region_areas = []
 
