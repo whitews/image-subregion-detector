@@ -801,7 +801,39 @@ class Application(tkinter.Frame):
         self.image_dir = os.path.dirname(selected_file.name)
 
     def export_sub_regions(self):
-        pass
+        hsv_img = cv2.cvtColor(np.array(self.image), cv2.COLOR_RGB2HSV)
+
+        for k, v in self.regions.items():
+            x1 = v['rectangle'][0]
+            y1 = v['rectangle'][1]
+            x2 = v['rectangle'][0] + v['rectangle'][2]
+            y2 = v['rectangle'][1] + v['rectangle'][3]
+
+            # extract sub-region from original image using rectangle
+            hsv_region = hsv_img[y1:y2, x1:x2]
+
+            # subtract the rect coordinates from the contour
+            local_contour = v['contour'] - [x1, y1]
+
+            # create a mask from the new contour
+            new_mask = np.zeros(
+                (v['rectangle'][3], v['rectangle'][2]),
+                dtype='uint8'
+            )
+            cv2.drawContours(new_mask, [local_contour], 0, 255, -1)
+
+            # mask the extracted sub-region & convert to float since only
+            # float arrays can hold NaN values
+            masked_region = cv2.bitwise_and(
+                hsv_region,
+                hsv_region,
+                mask=new_mask
+            ).astype(float)
+
+            # set non-contour areas to NaN
+            masked_region[new_mask == 0] = np.nan
+
+            # save
 
 root = tkinter.Tk()
 app = Application(root)
