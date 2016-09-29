@@ -46,6 +46,12 @@ class Application(tkinter.Frame):
         self.image_name = None
         self.image_dir = None
         self.bg_colors = None
+
+        # Detected regions will be saved as a dictionary with the bounding
+        # rectangles canvas ID as the key. The value will be another dictionary
+        # containing the contour itself and the rectangle coordinates
+        self.regions = None
+
         self.region_count = tkinter.IntVar()
         self.region_min = tkinter.DoubleVar()
         self.region_max = tkinter.DoubleVar()
@@ -604,50 +610,34 @@ class Application(tkinter.Frame):
 
         # make sure we have at least one detected region
         if len(contours) > 0:
-            region_areas, rectangles = self.get_contour_data(contours)
-
-            self.region_count.set(len(contours))
-            self.region_min.set(min(region_areas))
-            self.region_max.set(max(region_areas))
-            self.region_avg.set(np.round(np.mean(region_areas), decimals=1))
-
-            self.draw_rectangles(rectangles)
+            self.create_regions(contours)
         else:
             self.region_count.set(0)
             self.region_min.set(0.0)
             self.region_max.set(0.0)
             self.region_avg.set(0.0)
 
-    @staticmethod
-    def get_contour_data(contours):
+    def create_regions(self, contours):
         """
-        Returns list of pixel counts (areas) & bounding rectangles for
-        given contours
+        Creates regions (self.regions) & draws bounding rectangles on canvas
 
         Args:
             contours: list of OpenCV contours
         """
+        self.clear_rectangles()  # TODO: should be clear_regions
+        self.regions = {}
 
-        c_areas = []
-        rectangles = []
+        region_areas = []
 
         for c in contours:
-            c_areas.append(cv2.contourArea(c))
-            rectangles.append(cv2.boundingRect(c))
+            region_areas.append(cv2.contourArea(c))
+            rect = cv2.boundingRect(c)
 
-        return c_areas, rectangles
-
-    def reset_color_profile(self):
-        for color in COLOR_NAMES:
-            self.color_profile_vars[color].set("0.0%")
-
-    def draw_rectangles(self, rectangles):
-        for rect in rectangles:
             # using a custom fully transparent bitmap for the stipple, b/c
             # if the rectangle has no fill we cannot catch mouse clicks
             # within its boundaries (only on the border itself)
             # a bit of a hack but it works
-            self.canvas.create_rectangle(
+            rect_id = self.canvas.create_rectangle(
                 rect[0],
                 rect[1],
                 rect[0] + rect[2],
@@ -659,9 +649,19 @@ class Application(tkinter.Frame):
                 tag='rect'
             )
 
-        self.canvas.delete(self.rect)
-        self.rect = None
-        self.reset_color_profile()
+            self.regions[rect_id] = {
+                'contour': c,
+                'rectangle': rect
+            }
+
+        self.region_count.set(len(contours))
+        self.region_min.set(min(region_areas))
+        self.region_max.set(max(region_areas))
+        self.region_avg.set(np.round(np.mean(region_areas), decimals=1))
+
+    def reset_color_profile(self):
+        for color in COLOR_NAMES:
+            self.color_profile_vars[color].set("0.0%")
 
     def clear_rectangles(self):
         self.canvas.delete("rect")
