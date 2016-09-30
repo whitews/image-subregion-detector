@@ -4,6 +4,7 @@ from tkinter import messagebox
 from PIL import ImageTk
 import PIL.Image
 import os
+import re
 import cv2
 import numpy as np
 
@@ -108,6 +109,19 @@ class Application(tkinter.Frame):
             command=self.export_sub_regions
         )
         export_button.pack(side=tkinter.RIGHT)
+
+        self.export_string = tkinter.StringVar()
+        snip_label = tkinter.Label(
+            file_chooser_frame,
+            text="Export Label: ",
+            bg=BACKGROUND_COLOR
+        )
+        snip_label_entry = tkinter.Entry(
+            file_chooser_frame,
+            textvariable=self.export_string
+        )
+        snip_label_entry.pack(side=tkinter.RIGHT)
+        snip_label.pack(side=tkinter.RIGHT)
 
         # the canvas frame's contents will use grid b/c of the double
         # scrollbar (they don't look right using pack), but the canvas itself
@@ -801,6 +815,29 @@ class Application(tkinter.Frame):
         self.image_dir = os.path.dirname(selected_file.name)
 
     def export_sub_regions(self):
+        if not self.regions:
+            return
+
+        if len(self.regions) == 0:
+            return
+
+        if self.export_string.get() == '':
+            messagebox.showwarning(
+                'Export Label',
+                'Please create an export label.'
+            )
+            return
+
+        output_dir = "/".join(
+            [
+                self.image_dir,
+                self.export_string.get().strip()
+            ]
+        )
+
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+
         hsv_img = cv2.cvtColor(np.array(self.image), cv2.COLOR_RGB2HSV)
 
         for k, v in self.regions.items():
@@ -818,22 +855,38 @@ class Application(tkinter.Frame):
             # create a mask from the new contour
             new_mask = np.zeros(
                 (v['rectangle'][3], v['rectangle'][2]),
-                dtype='uint8'
+                dtype=np.uint8
             )
             cv2.drawContours(new_mask, [local_contour], 0, 255, -1)
 
-            # mask the extracted sub-region & convert to float since only
-            # float arrays can hold NaN values
+            # mask the extracted sub-region & convert to int16
+            # to use -1 for non-contour pixels
             masked_region = cv2.bitwise_and(
                 hsv_region,
                 hsv_region,
                 mask=new_mask
-            ).astype(float)
+            ).astype(np.int16)
 
             # set non-contour areas to NaN
-            masked_region[new_mask == 0] = np.nan
+            masked_region[new_mask == 0] = -1
 
-            # save
+            # save sub-region to file as NumPy array
+            match = re.search('(.+)\.(.+)$', self.image_name)
+            output_filename = "".join(
+                [
+                    match.groups()[0],
+                    '_<',
+                    str(x1),
+                    ',',
+                    str(y1),
+                    '>'
+                ]
+            )
+            output_filename = ".".join([output_filename, 'npy'])
+
+            output_file_path = "/".join([output_dir, output_filename])
+
+            np.save(output_file_path, masked_region)
 
 root = tkinter.Tk()
 app = Application(root)
