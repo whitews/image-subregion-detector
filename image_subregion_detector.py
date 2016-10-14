@@ -875,11 +875,10 @@ class Application(tkinter.Frame):
             output_filename = "".join(
                 [
                     match.groups()[0],
-                    '_<',
+                    '_',
                     str(x1),
                     ',',
-                    str(y1),
-                    '>'
+                    str(y1)
                 ]
             )
             output_filename = ".".join([output_filename, 'npy'])
