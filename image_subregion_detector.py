@@ -12,10 +12,10 @@ from isd_lib import utils
 
 BACKGROUND_COLOR = '#ededed'
 
-WINDOW_WIDTH = 900
+WINDOW_WIDTH = 990
 WINDOW_HEIGHT = 720
 
-PREVIEW_SIZE = 200  # height & width of preview in pixels
+PREVIEW_SIZE = 256  # height & width of preview in pixels
 
 PAD_SMALL = 2
 PAD_MEDIUM = 4
@@ -84,7 +84,7 @@ class Application(tkinter.Frame):
             expand=False,
             side=tkinter.LEFT,
             padx=PAD_MEDIUM,
-            pady=(40, 10)
+            pady=PAD_MEDIUM
         )
 
         file_chooser_frame = tkinter.Frame(self.left_frame, bg=BACKGROUND_COLOR)
@@ -103,12 +103,23 @@ class Application(tkinter.Frame):
         )
         file_chooser_button.pack(side=tkinter.LEFT)
 
-        export_button = tkinter.Button(
+        self.export_format = tkinter.StringVar()
+        self.export_format.set('numpy')
+        format_label = tkinter.Label(
             file_chooser_frame,
-            text='Export Sub-regions',
-            command=self.export_sub_regions
+            text="  Export Format: ",
+            bg=BACKGROUND_COLOR
         )
-        export_button.pack(side=tkinter.RIGHT)
+        export_fmt_combo = tkinter.OptionMenu(
+            file_chooser_frame,
+            self.export_format,
+            "numpy",
+            "tiff",
+            "both"
+        )
+        export_fmt_combo.config(width=6)
+        export_fmt_combo.pack(side=tkinter.RIGHT)
+        format_label.pack(side=tkinter.RIGHT)
 
         self.export_string = tkinter.StringVar()
         snip_label = tkinter.Label(
@@ -162,12 +173,19 @@ class Application(tkinter.Frame):
         self.scrollbar_h.grid(row=1, column=0, sticky=tkinter.E + tkinter.W)
 
         # start packing in right_frame
+        export_button = tkinter.Button(
+            self.right_frame,
+            text='Export Sub-regions',
+            command=self.export_sub_regions
+        )
+        export_button.pack(fill=tkinter.BOTH, anchor=tkinter.N)
+
         bg_colors_frame = tkinter.Frame(self.right_frame, bg=BACKGROUND_COLOR)
         bg_colors_frame.pack(
             fill=tkinter.BOTH,
             expand=False,
             anchor=tkinter.N,
-            pady=PAD_MEDIUM
+            pady=(PAD_EXTRA_LARGE, PAD_MEDIUM)
         )
         bg_colors_label = tkinter.Label(
             bg_colors_frame,
@@ -828,6 +846,8 @@ class Application(tkinter.Frame):
             )
             return
 
+        export_format = self.export_format.get()
+
         output_dir = "/".join(
             [
                 self.image_dir,
@@ -846,31 +866,7 @@ class Application(tkinter.Frame):
             x2 = v['rectangle'][0] + v['rectangle'][2]
             y2 = v['rectangle'][1] + v['rectangle'][3]
 
-            # extract sub-region from original image using rectangle
-            hsv_region = hsv_img[y1:y2, x1:x2]
-
-            # subtract the rect coordinates from the contour
-            local_contour = v['contour'] - [x1, y1]
-
-            # create a mask from the new contour
-            new_mask = np.zeros(
-                (v['rectangle'][3], v['rectangle'][2]),
-                dtype=np.uint8
-            )
-            cv2.drawContours(new_mask, [local_contour], 0, 255, -1)
-
-            # mask the extracted sub-region & convert to int16
-            # to use -1 for non-contour pixels
-            masked_region = cv2.bitwise_and(
-                hsv_region,
-                hsv_region,
-                mask=new_mask
-            ).astype(np.int16)
-
-            # set non-contour areas to NaN
-            masked_region[new_mask == 0] = -1
-
-            # save sub-region to file as NumPy array
+            # build base file name for output files
             match = re.search('(.+)\.(.+)$', self.image_name)
             output_filename = "".join(
                 [
@@ -881,11 +877,42 @@ class Application(tkinter.Frame):
                     str(y1)
                 ]
             )
-            output_filename = ".".join([output_filename, 'npy'])
 
-            output_file_path = "/".join([output_dir, output_filename])
+            if export_format == 'tiff' or export_format == 'both':
+                region = self.image.crop((x1, y1, x2, y2))
+                tif_filename = ".".join([output_filename, 'tif'])
+                tif_file_path = "/".join([output_dir, tif_filename])
+                region.save(tif_file_path)
 
-            np.save(output_file_path, masked_region)
+            if export_format == 'numpy' or export_format == 'both':
+                # extract sub-region from original image using rectangle
+                hsv_region = hsv_img[y1:y2, x1:x2]
+
+                # subtract the rect coordinates from the contour
+                local_contour = v['contour'] - [x1, y1]
+
+                # create a mask from the new contour
+                new_mask = np.zeros(
+                    (v['rectangle'][3], v['rectangle'][2]),
+                    dtype=np.uint8
+                )
+                cv2.drawContours(new_mask, [local_contour], 0, 255, -1)
+
+                # mask the extracted sub-region & convert to int16
+                # to use -1 for non-contour pixels
+                masked_region = cv2.bitwise_and(
+                    hsv_region,
+                    hsv_region,
+                    mask=new_mask
+                ).astype(np.int16)
+
+                # set non-contour areas to -1
+                masked_region[new_mask == 0] = -1
+
+                # save sub-region to file as NumPy array
+                npy_filename = ".".join([output_filename, 'npy'])
+                npy_file_path = "/".join([output_dir, npy_filename])
+                np.save(npy_file_path, masked_region)
 
 root = tkinter.Tk()
 app = Application(root)
